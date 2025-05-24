@@ -1,12 +1,13 @@
 package com.emedina.command.spring;
 
-import com.emedina.sharedkernel.command.Command;
-import com.emedina.sharedkernel.command.core.CommandHandler;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.emedina.sharedkernel.command.Command;
+import com.emedina.sharedkernel.command.core.CommandHandler;
 
 /**
  * A registry that holds the mapping between a command and its handler using Spring's {@link ApplicationContext}.
@@ -39,7 +40,7 @@ public final class Registry {
     private void register(final ApplicationContext applicationContext, final String name) {
         Class<CommandHandler<?>> handlerClass = (Class<CommandHandler<?>>) applicationContext.getType(name);
         Class<?>[] generics = GenericTypeResolver.resolveTypeArguments(handlerClass, CommandHandler.class);
-        Class<? extends Command> commandType = (Class<? extends Command>) generics[1];
+        Class<? extends Command> commandType = (Class<? extends Command>) generics[0];
 
         this.providerMap.put(commandType, new CommandProvider(applicationContext, handlerClass));
     }

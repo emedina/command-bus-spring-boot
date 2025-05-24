@@ -1,3 +1,181 @@
-# Spring Command Bus
+# 🚌 Spring Command Bus
 
-A lightweight command bus implementation for Spring. This module allows you to handle commands in a centralized and decoupled way, by using the Spring's registry for command handlers.
+A lightweight command bus implementation for Spring Boot applications that enables centralized command handling using Spring's dependency injection capabilities.
+
+## 🎯 Overview
+
+This library provides a clean implementation of the Command pattern integrated with Spring's application context. It automatically discovers command handlers and routes commands to their appropriate handlers, promoting loose coupling and separation of concerns in your application architecture.
+
+## ✨ Features
+
+- **🔍 Automatic Handler Discovery**: Automatically registers command handlers from Spring's application context
+- **🎯 Type-Safe Command Routing**: Routes commands to their corresponding handlers based on generic type resolution
+- **🔧 Spring Integration**: Leverages Spring's dependency injection for handler instantiation
+- **⚡ Lightweight**: Minimal overhead with clean, focused API
+- **🏗️ Hexagonal Architecture Support**: Perfect for implementing the command side of CQRS patterns
+
+## 📦 Installation
+
+Add the dependency to your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>com.emedina.command</groupId>
+    <artifactId>command-bus-spring-boot</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+## 🚀 Quick Start
+
+### 1️⃣ Create a Command
+
+```java
+import com.emedina.sharedkernel.command.Command;
+
+public class CreateUserCommand implements Command {
+    private final String username;
+    private final String email;
+    
+    public CreateUserCommand(String username, String email) {
+        this.username = username;
+        this.email = email;
+    }
+    
+    // getters...
+}
+```
+
+### 2️⃣ Create a Command Handler
+
+```java
+import com.emedina.sharedkernel.command.core.CommandHandler;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CreateUserCommandHandler implements CommandHandler<CreateUserCommand> {
+    
+    @Override
+    public void handle(CreateUserCommand command) {
+        // Handle the command logic
+        System.out.println("Creating user: " + command.getUsername());
+    }
+}
+```
+
+### 3️⃣ Configure the Command Bus
+
+```java
+import com.emedina.command.spring.Registry;
+import com.emedina.command.spring.SpringCommandBus;
+import com.emedina.sharedkernel.command.core.CommandBus;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class CommandBusConfiguration {
+    
+    @Bean
+    public Registry registry(ApplicationContext applicationContext) {
+        return new Registry(applicationContext);
+    }
+    
+    @Bean
+    public CommandBus commandBus(Registry registry) {
+        return new SpringCommandBus(registry);
+    }
+}
+```
+
+### 4️⃣ Use the Command Bus
+
+```java
+import com.emedina.sharedkernel.command.core.CommandBus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+    
+    @Autowired
+    private CommandBus commandBus;
+    
+    public void createUser(String username, String email) {
+        CreateUserCommand command = new CreateUserCommand(username, email);
+        commandBus.execute(command);
+    }
+}
+```
+
+## 🏗️ Architecture
+
+The command bus consists of three main components:
+
+### 🚌 CommandBus
+
+The main interface for executing commands. The `SpringCommandBus` implementation routes commands to their handlers.
+
+### 📋 Registry
+
+Maintains the mapping between command types and their handlers. It automatically discovers handlers from Spring's application context using generic type resolution.
+
+### 🏭 CommandProvider
+
+A factory that creates command handler instances using Spring's dependency injection capabilities.
+
+## ⚙️ How It Works
+
+1. **🔍 Handler Discovery**: On startup, the `Registry` scans the Spring application context for beans implementing `CommandHandler<T>`
+2. **🧬 Type Resolution**: Uses Spring's `GenericTypeResolver` to determine which command type each handler processes
+3. **📝 Handler Registration**: Maps command types to their corresponding handler providers
+4. **🚀 Command Execution**: When a command is executed, the bus looks up the appropriate handler and delegates execution
+
+## 🧪 Testing
+
+The library includes comprehensive unit and integration tests. Run tests with:
+
+```bash
+mvn test
+```
+
+### 📊 Test Coverage
+
+- ✅ **Unit Tests**: All components tested with Mockito
+- ✅ **Integration Tests**: Real Spring context validation
+- ✅ **Edge Cases**: Missing handlers and empty contexts covered
+- ✅ **90%+ Coverage**: Comprehensive test suite
+
+## 📋 Dependencies
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| **Spring Framework** | 6.2.1 | Core Spring integration |
+| **Java** | 24 | Runtime platform |
+| **Shared Kernel Command Bus** | 1.0.0 | Command interfaces |
+
+## 🤝 Contributing
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch
+3. ✅ Add tests for your changes
+4. 🧪 Ensure all tests pass
+5. 📤 Submit a pull request
+
+## 📄 License
+
+This project is part of the hexagonal architecture examples and follows the same licensing terms.
+
+## 👨‍💻 Author
+
+**Enrique Medina Montenegro**
+
+---
+
+## 🏷️ Tags
+
+`spring-boot` `command-bus` `cqrs` `hexagonal-architecture` `ddd` `command-pattern` `spring-framework` `dependency-injection`
+
+---
+
+*🎯 This library is designed to support clean architecture principles and CQRS patterns in Spring Boot applications.*

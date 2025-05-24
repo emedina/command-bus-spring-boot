@@ -1,0 +1,153 @@
+package com.emedina.command.spring;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
+
+import com.emedina.command.spring.fixtures.AnotherTestCommand;
+import com.emedina.command.spring.fixtures.AnotherTestCommandHandler;
+import com.emedina.command.spring.fixtures.TestCommand;
+import com.emedina.command.spring.fixtures.TestCommandHandler;
+import com.emedina.sharedkernel.command.core.CommandHandler;
+
+/**
+ * Unit tests for Registry.
+ * 
+ * @author Enrique Medina Montenegro
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Registry")
+class RegistryTest {
+
+    @Mock
+    private ApplicationContext applicationContext;
+
+    private Registry registry;
+
+    private void setupWithHandlers() {
+        // given - mock application context to return command handler beans
+        when(applicationContext.getBeanNamesForType(CommandHandler.class))
+            .thenReturn(new String[] { "testCommandHandler", "anotherTestCommandHandler" });
+
+        when(applicationContext.getType("testCommandHandler"))
+            .thenReturn((Class) TestCommandHandler.class);
+        when(applicationContext.getType("anotherTestCommandHandler"))
+            .thenReturn((Class) AnotherTestCommandHandler.class);
+
+        when(applicationContext.getBean(TestCommandHandler.class))
+            .thenReturn(new TestCommandHandler());
+        when(applicationContext.getBean(AnotherTestCommandHandler.class))
+            .thenReturn(new AnotherTestCommandHandler());
+    }
+
+    private void setupWithTestHandlerOnly() {
+        // given - mock application context to return only test command handler
+        when(applicationContext.getBeanNamesForType(CommandHandler.class))
+            .thenReturn(new String[] { "testCommandHandler" });
+
+        when(applicationContext.getType("testCommandHandler"))
+            .thenReturn((Class) TestCommandHandler.class);
+
+        when(applicationContext.getBean(TestCommandHandler.class))
+            .thenReturn(new TestCommandHandler());
+    }
+
+    private void setupWithoutHandlers() {
+        when(applicationContext.getBeanNamesForType(CommandHandler.class))
+            .thenReturn(new String[] {});
+    }
+
+    @Test
+    @DisplayName("should register command handlers during construction")
+    void shouldRegisterCommandHandlersDuringConstruction() {
+        // given
+        setupWithHandlers();
+
+        // when
+        registry = new Registry(applicationContext);
+
+        // then
+        CommandHandler<TestCommand> testHandler = registry.get(TestCommand.class);
+        CommandHandler<AnotherTestCommand> anotherHandler = registry.get(AnotherTestCommand.class);
+
+        assertThat(testHandler).isNotNull();
+        assertThat(testHandler).isInstanceOf(TestCommandHandler.class);
+        assertThat(anotherHandler).isNotNull();
+        assertThat(anotherHandler).isInstanceOf(AnotherTestCommandHandler.class);
+    }
+
+    @Test
+    @DisplayName("should return correct handler for command type")
+    void shouldReturnCorrectHandlerForCommandType() {
+        // given
+        setupWithTestHandlerOnly();
+        registry = new Registry(applicationContext);
+
+        // when
+        CommandHandler<TestCommand> handler = registry.get(TestCommand.class);
+
+        // then
+        assertThat(handler).isInstanceOf(TestCommandHandler.class);
+
+        TestCommand command = new TestCommand("test");
+        handler.handle(command);
+
+        TestCommandHandler testHandler = (TestCommandHandler) handler;
+        assertThat(testHandler.wasExecuted()).isTrue();
+        assertThat(testHandler.getLastCommand()).isEqualTo(command);
+    }
+
+    @Test
+    @DisplayName("should handle multiple command types")
+    void shouldHandleMultipleCommandTypes() {
+        // given
+        setupWithHandlers();
+        registry = new Registry(applicationContext);
+
+        // when
+        CommandHandler<TestCommand> testHandler = registry.get(TestCommand.class);
+        CommandHandler<AnotherTestCommand> anotherHandler = registry.get(AnotherTestCommand.class);
+
+        // then
+        assertThat(testHandler).isInstanceOf(TestCommandHandler.class);
+        assertThat(anotherHandler).isInstanceOf(AnotherTestCommandHandler.class);
+        assertThat(testHandler).isNotSameAs(anotherHandler);
+    }
+
+    @Test
+    @DisplayName("should return null when no handler registered for command type")
+    void shouldReturnNullWhenNoHandlerRegisteredForCommandType() {
+        // given
+        when(applicationContext.getBeanNamesForType(CommandHandler.class))
+            .thenReturn(new String[] {});
+        registry = new Registry(applicationContext);
+
+        // when & then
+        assertThatThrownBy(() -> registry.get(TestCommand.class))
+            .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("should handle empty application context")
+    void shouldHandleEmptyApplicationContext() {
+        // given
+        when(applicationContext.getBeanNamesForType(CommandHandler.class))
+            .thenReturn(new String[] {});
+
+        // when
+        registry = new Registry(applicationContext);
+
+        // then
+        assertThatThrownBy(() -> registry.get(TestCommand.class))
+            .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> registry.get(AnotherTestCommand.class))
+            .isInstanceOf(NullPointerException.class);
+    }
+}
