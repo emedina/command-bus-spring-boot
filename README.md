@@ -2,6 +2,34 @@
 
 A lightweight command bus implementation for Spring Boot applications that enables centralized command handling using Spring's dependency injection capabilities.
 
+## 📚 Further Learning
+
+This implementation is part of a comprehensive exploration of Hexagonal Architecture patterns. The concepts are covered in depth in:
+
+**English Version**
+*Decoupling by Design: A Pragmatic Approach to Hexagonal Architecture*
+
+- [PDF](https://leanpub.com/decouplingbydesignapractitionersguidetohexagonalarchitecture)  
+- [Kindle](https://a.co/d/4KwauyK)  
+- [Paperback](https://a.co/d/cGQI8gX)  
+
+**Versión en Español**  
+*Desacoplamiento por Diseño: Una Guía Práctica para la Arquitectura Hexagonal*
+
+- [PDF](https://leanpub.com/desacoplamientopordiseounaguaprcticaparalaarquitecturahexagonal)  
+- [Kindle](https://amzn.eu/d/ic50CoH)  
+- [Tapa blanda](https://amzn.eu/d/1fHOpN6)  
+
+The book provides in-depth coverage of:
+
+- Spring Boot command bus implementations and patterns
+- Automatic handler discovery techniques
+- Type-safe command routing strategies
+- Spring integration for hexagonal architecture
+- Command pattern variations in CQRS systems
+- Real-world applications of command buses
+- Testing strategies for command-driven systems
+
 ## 🎯 Overview
 
 This library provides a clean implementation of the Command pattern integrated with Spring's application context. It automatically discovers command handlers and routes commands to their appropriate handlers, promoting loose coupling and separation of concerns in your application architecture.
