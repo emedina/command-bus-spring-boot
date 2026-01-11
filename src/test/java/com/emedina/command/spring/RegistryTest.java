@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.emedina.command.spring.fixtures.AnotherTestCommand;
 import com.emedina.command.spring.fixtures.AnotherTestCommandHandler;
+import com.emedina.command.spring.fixtures.RawTypeCommandHandler;
 import com.emedina.command.spring.fixtures.TestCommand;
 import com.emedina.command.spring.fixtures.TestCommandHandler;
 import com.emedina.sharedkernel.command.core.CommandHandler;
@@ -31,6 +32,7 @@ class RegistryTest {
 
     private Registry registry;
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void setupWithHandlers() {
         // given - mock application context to return command handler beans
         when(applicationContext.getBeanNamesForType(CommandHandler.class))
@@ -47,6 +49,7 @@ class RegistryTest {
             .thenReturn(new AnotherTestCommandHandler());
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void setupWithTestHandlerOnly() {
         // given - mock application context to return only test command handler
         when(applicationContext.getBeanNamesForType(CommandHandler.class))
@@ -125,8 +128,7 @@ class RegistryTest {
     @DisplayName("should return null when no handler registered for command type")
     void shouldReturnNullWhenNoHandlerRegisteredForCommandType() {
         // given
-        when(applicationContext.getBeanNamesForType(CommandHandler.class))
-            .thenReturn(new String[] {});
+        setupWithoutHandlers();
         registry = new Registry(applicationContext);
 
         // when & then
@@ -138,8 +140,7 @@ class RegistryTest {
     @DisplayName("should handle empty application context")
     void shouldHandleEmptyApplicationContext() {
         // given
-        when(applicationContext.getBeanNamesForType(CommandHandler.class))
-            .thenReturn(new String[] {});
+        setupWithoutHandlers();
 
         // when
         registry = new Registry(applicationContext);
@@ -150,4 +151,37 @@ class RegistryTest {
         assertThatThrownBy(() -> registry.get(AnotherTestCommand.class))
             .isInstanceOf(NullPointerException.class);
     }
+
+    @Test
+    @DisplayName("should throw IllegalStateException when handler has no generic type information")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    void shouldThrowIllegalStateExceptionWhenHandlerHasNoGenericTypeInformation() {
+        // given
+        when(applicationContext.getBeanNamesForType(CommandHandler.class))
+            .thenReturn(new String[] { "rawTypeCommandHandler" });
+        when(applicationContext.getType("rawTypeCommandHandler"))
+            .thenReturn((Class) RawTypeCommandHandler.class);
+
+        // when & then
+        assertThatThrownBy(() -> new Registry(applicationContext))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Could not resolve command type for handler: rawTypeCommandHandler");
+    }
+
+    @Test
+    @DisplayName("should throw IllegalStateException when generic type resolution returns null")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    void shouldThrowIllegalStateExceptionWhenGenericTypeResolutionReturnsNull() {
+        // given
+        when(applicationContext.getBeanNamesForType(CommandHandler.class))
+            .thenReturn(new String[] { "rawTypeCommandHandler" });
+        when(applicationContext.getType("rawTypeCommandHandler"))
+            .thenReturn((Class) RawTypeCommandHandler.class);
+
+        // when & then
+        assertThatThrownBy(() -> new Registry(applicationContext))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Could not resolve command type for handler: rawTypeCommandHandler");
+    }
+
 }

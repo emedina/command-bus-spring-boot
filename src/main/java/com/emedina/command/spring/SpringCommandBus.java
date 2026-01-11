@@ -27,10 +27,13 @@ public class SpringCommandBus implements CommandBus {
      * Delegates the handling of the command to the corresponding {@link Bean} from Spring.
      *
      * @param command the command object
+     * @param <C>     the type of the command
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <C extends Command> void execute(final C command) {
-        CommandHandler<C> commandHandler = (CommandHandler<C>) this.registry.get(command.getClass());
+        Class<C> commandClass = (Class<C>) command.getClass();
+        CommandHandler<C> commandHandler = this.registry.get(commandClass);
         commandHandler.handle(command);
     }
 
