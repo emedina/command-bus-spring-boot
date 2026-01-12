@@ -1,7 +1,7 @@
 # 🚌 Spring Command Bus
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Java Version](https://img.shields.io/badge/Java-24-blue)
+![Java Version](https://img.shields.io/badge/Java-25-blue)
 ![Test Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)
 
 A lightweight command bus implementation for Spring Boot applications that enables centralized command handling using Spring's dependency injection capabilities.
@@ -182,8 +182,8 @@ mvn test
 
 | Dependency | Version | Purpose |
 |------------|---------|---------|
-| **Spring Framework** | 6.2.1 | Core Spring integration |
-| **Java** | 24 | Runtime platform |
+| **Spring Framework** | 7.0.2 | Core Spring integration |
+| **Java** | 25 | Runtime platform |
 | **Shared Kernel Command Bus** | 1.0.0 | Command interfaces |
 
 ## 🤝 Contributing
