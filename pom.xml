@@ -75,7 +75,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.emedina.sharedkernel</groupId>
+            <groupId>io.github.emedina</groupId>
             <artifactId>shared-kernel-command-bus</artifactId>
             <version>${shared-kernel-command-bus.version}</version>
         </dependency>

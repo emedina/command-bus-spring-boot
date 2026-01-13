@@ -52,7 +52,7 @@ Add the dependency to your `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>com.emedina.command</groupId>
+    <groupId>io.github.emedina</groupId>
     <artifactId>command-bus-spring-boot</artifactId>
     <version>1.0.0</version>
 </dependency>
